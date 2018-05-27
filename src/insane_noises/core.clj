@@ -5,10 +5,12 @@
   (:require
    [overtone.inst.drum :as drum]
    [overtone.inst.synth :as synth]
+   [overtone.inst.sampled-piano :as piano]
    [overtone.live :as overtone]
    [leipzig.live :as live]
    [leipzig.scale :as scale]
    [leipzig.melody :refer [all bpm is phrase tempo then times where with]]))
+
 
 (def metro (metronome 110))
 
@@ -64,6 +66,13 @@
   (at (metro (+ 3 1/3 beat)) (drum/dub-kick))
   (at (metro (+ 3 2/3 beat)) (drum/dub-kick))
   (at (metro (+ 3 5/6 beat)) (drum/dub-kick))
+
+  ;; (at (metro (+ 0 beat)) (play-chord (chord :C4 :major)))
+  ;; (at (metro (+ 1 beat)) (play-chord (chord :G3 :maj11)))
+
+  ;; (at (metro (+ 1/4 beat)) (drum/closed-hat))
+  ;; (at (metro (+ 2/4 beat)) (drum/closed-hat))
+  ;; (at (metro (+ 3/4 beat)) (drum/closed-hat))
 
   (at (metro (+ 1 beat)) (drum/snare 320 1 1/4))
   (at (metro (+ 3 beat)) (drum/snare 320 1 1/4))
@@ -124,7 +133,7 @@
 
 
 (def melody
-                                        ; Row,  row,  row   your  boat
+  ;; Row,  row,  row   your  boat
   (phrase [3/3   3/3   2/3   1/3   3/3]
           [3/3   3/3   1/3   1/3   3/3]
           [  0     0     0     1     2]))
@@ -132,7 +141,7 @@
 (overtone/definst beep [freq 440 dur 1.0]
   (-> freq
       overtone/saw
-      (* (overtone/env-gen (overtone/perc 0.05 dur) :action overtone/FREE))))
+      (* (overtone/env-gen (overtone/perc 0.5 dur) :action overtone/FREE))))
 
 (defmethod live/play-note :default [{midi :pitch seconds :duration}]
   (-> midi overtone/midi->hz (beep seconds)))
@@ -167,15 +176,25 @@
  live/play)
 
 (defmethod live/play-note :melody [{midi :pitch}]
+  (println midi)
+  (some-> (+ 3 midi) overtone/midi->hz beep)
   (some-> midi overtone/midi->hz beep))
 
 (def boring-scale
-  (->> (phrase (repeat 1) (range 8))
+  (->> (phrase (repeat 1) [ 0 1 2 3 4 5 ])
        (all :part :melody)
-       (where :pitch (comp scale/G scale/blues))))
+       (where :pitch (comp scale/E scale/blues))))
+
+(->> (phrase (repeat 1) [ 0 1 2 3 4 5 ])
+     (all :part :melody)
+     (where :pitch (comp scale/E scale/blues)))
 
 (live/jam (var boring-scale))
+
+(live/stop)
 
 (stop)
 
 ;; scale/minor
+
+(chord :c3 :maj11)
