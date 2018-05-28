@@ -4,6 +4,7 @@
   (:use [clojure.pprint])
   (:require
    [overtone.inst.drum :as drum]
+   [overtone.inst.synth :as synth]
    [overtone.inst.sampled-piano :as piano]
    [overtone.live :as overtone]
    [leipzig.live :as live]
@@ -39,31 +40,64 @@
 (defn play-chord [a-chord]
   (doseq [note a-chord] (saw2 note)))
 
-(play-chord (chord :C4 :major))
+(synth/harmonic-swimming)
+
+(synth/cs80lead 84)
+
+(synth/ks-stringer)
+
+(stop)
+
+(def m (synth/mooger 63))
+
+(kill m)
+
+(definst bar [] (sin-osc [440 442 444 480 560]))
+
+(bar)
+
+(stop)
+
+(defn hati-fnati [metro beat base]
+  (at (metro (+ base 1/4 beat)) (drum/closed-hat))
+  (at (metro (+ base 2/4 beat)) (drum/closed-hat))
+  (at (metro (+ base 3/4 beat)) (drum/closed-hat))
+  (at (metro (+ base 7/16 beat)) (drum/closed-hat)))
 
 (defn player [beat]
   (at (metro beat) (drum/kick))
 
-  (at (metro (+ 0 beat)) (play-chord (chord :C4 :major)))
-  (at (metro (+ 1 beat)) (play-chord (chord :G3 :maj11)))
+  (at (metro (+ 1 beat)) (drum/dub-kick))
+  (at (metro (+ 2 beat)) (drum/dub-kick))
+  (at (metro (+ 2 1/2 beat)) (drum/dub-kick))
+  (at (metro (+ 3 beat)) (drum/dub-kick))
+  (at (metro (+ 3 1/3 beat)) (drum/dub-kick))
+  (at (metro (+ 3 2/3 beat)) (drum/dub-kick))
+  (at (metro (+ 3 5/6 beat)) (drum/dub-kick))
 
-  (at (metro (+ 1/4 beat)) (drum/closed-hat))
-  (at (metro (+ 2/4 beat)) (drum/closed-hat))
-  (at (metro (+ 3/4 beat)) (drum/closed-hat))
+  ;; (at (metro (+ 0 beat)) (play-chord (chord :C4 :major)))
+  ;; (at (metro (+ 1 beat)) (play-chord (chord :G3 :maj11)))
+
+  ;; (at (metro (+ 1/4 beat)) (drum/closed-hat))
+  ;; (at (metro (+ 2/4 beat)) (drum/closed-hat))
+  ;; (at (metro (+ 3/4 beat)) (drum/closed-hat))
 
   (at (metro (+ 1 beat)) (drum/snare 320 1 1/4))
+  (at (metro (+ 3 beat)) (drum/snare 320 1 1/4))
   (at (metro (+ 1 7/16 beat)) (drum/snare 120 1/2 1/4))
 
-  (at (metro (+ 1 1/4 beat)) (drum/closed-hat))
-  (at (metro (+ 1 2/4 beat)) (drum/closed-hat))
-  (at (metro (+ 1 3/4 beat)) (drum/closed-hat))
-  (at (metro (+ 1 7/16 beat)) (drum/closed-hat))
+  (hati-fnati metro beat 0)
+  (hati-fnati metro beat 1)
+  (hati-fnati metro beat 2)
+  (hati-fnati metro beat 3)
 
-  (apply-by (metro (+ 2 beat))
-            #'player (+ 2 beat) []))
+  (apply-by (metro (+ 4 beat))
+            #'player (+ 4 beat) []))
 
 ;; play
 (player (metro))
+
+(overtone.examples.compositions.jazz)
 
 (stop)
 
