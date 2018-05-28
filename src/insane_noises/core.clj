@@ -7,9 +7,14 @@
    [overtone.inst.sampled-piano :as piano]
    [overtone.live :as overtone]
    [leipzig.live :as live]
+   [leipzig.chord :as chord]
    [leipzig.scale :as scale]
    [leipzig.melody :refer [all bpm is phrase tempo then times where with]]))
 
+(map leipzig.scale/blues (range 5))
+
+(map (partial + 12)
+     (map leipzig.scale/blues (range 5)))
 
 (def metro (metronome 110))
 
@@ -17,6 +22,9 @@
   (* (env-gen (env-lin attack sustain release) 1 1 0 1 FREE)
      (saw freq)
      vol))
+
+(overtone.inst.sampled-piano/sampled-piano 34)
+(overtone.inst.sampled-piano/sampled-piano 54)
 
 (saw-wave 440)
 (saw-wave (midi->hz 69))
@@ -142,18 +150,33 @@
  live/play)
 
 (defmethod live/play-note :melody [{midi :pitch}]
-  (println midi)
-  (some-> (+ 3 midi) overtone/midi->hz beep)
-  (some-> midi overtone/midi->hz beep))
+  (some-> midi overtone.inst.sampled-piano/sampled-piano))
+
+(phrase
+ [4 4]
+ [(-> triad (root 3))
+  (-> triad (inversion 2) (root 4))])
 
 (def boring-scale
-  (->> (phrase (repeat 1) [ 0 1 2 3 4 5 ])
-       (all :part :melody)
-       (where :pitch (comp scale/E scale/blues))))
+  (->> #_(phrase (repeat 1) [ 0 0 8 5 3 4 5 8 ])
+       #_(phrase [5/3 30/31 2/3 1 2]
+               [0   3   0   5 0])
 
-(->> (phrase (repeat 1) [ 0 1 2 3 4 5 ])
-     (all :part :melody)
-     (where :pitch (comp scale/E scale/blues)))
+       (phrase
+        #_(repeat 3)
+        [1 1 2/3 4/3 5/3 1/3]
+        [(-> chord/triad (chord/root 0))
+         (-> chord/triad (chord/root 0))
+         (-> chord/triad (chord/inversion 2) (chord/root 4))
+         (-> chord/triad (chord/inversion 2) (chord/root 3))
+         (-> chord/triad (chord/inversion 1) (chord/root 0))
+         (-> chord/seventh (chord/inversion 1) (chord/root 0))])
+
+       (all :part :melody)
+       (tempo (bpm 120))
+       (where :pitch (comp scale/F scale/pentatonic))))
+
+(chord/root chord/triad 0)
 
 (live/jam (var boring-scale))
 
